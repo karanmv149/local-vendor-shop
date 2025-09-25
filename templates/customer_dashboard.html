@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container">
+    <h2>My Orders</h2>
+    <p>Here you can track the status of your recent orders.</p>
+
+    {% if orders %}
+    <div class="accordion" id="ordersAccordion">
+        {% for order in orders %}
+        <div class="accordion-item" data-aos="fade-up">
+            <h2 class="accordion-header" id="heading{{ order.id }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ order.id }}">
+                    Order #{{ order.id }} - Placed on {{ order.created_at.strftime('%Y-%m-%d') }} | Status: <span class="fw-bold ms-1">{{ order.status }}</span>
+                </button>
+            </h2>
+            <div id="collapse{{ order.id }}" class="accordion-collapse collapse" data-bs-parent="#ordersAccordion">
+                <div class="accordion-body">
+                    <p><strong>Shop:</strong> <span class="hover-underline-animation">{{ order.vendor.shop_name }}</span></p>
+                    <p><strong>Total Price:</strong> ₹{{ "%.2f"|format(order.total_price) }}</p>
+                    <p><strong>Delivery:</strong> {{ order.delivery_mode }}</p>
+                    <h5>Items:</h5>
+                    <ul>
+                        {% for item in order.items %}
+                        <li><span class="hover-underline-animation">{{ item.product.name }}</span> (x{{ item.quantity }}) - ₹{{ "%.2f"|format(item.price) }} each</li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="progress mt-4" style="height: 20px;">
+                        {% set statuses = ['Placed', 'Accepted', 'Out for Delivery', 'Delivered'] %}
+                        {% set current_index = statuses.index(order.status) if order.status in statuses else -1 %}
+                        {% for i in range(statuses|length) %}
+                            <div class="progress-bar {% if i <= current_index %}bg-primary{% else %}bg-secondary{% endif %}" role="progressbar" style="width: 25%;">
+                                {{ statuses[i] }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                     {% if order.status == 'Rejected' %}
+                     <div class="alert alert-danger mt-3">This order was rejected by the vendor.</div>
+                     {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5 card" data-aos="fade-up">
+        <div class="card-body">
+            <h3>You have no orders yet.</h3>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Start Shopping!</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

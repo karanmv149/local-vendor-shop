@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="form-wrapper">
+            <h2 class="text-center">Create an Account</h2>
+            <p class="text-center text-muted mb-4">Join the Dukaan community today!</p>
+            <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">I am a...</label>
+                    <select class="form-select" id="role" name="role" onchange="toggleVendorFields()">
+                        <option value="customer">Customer</option>
+                        <option value="vendor">Vendor</option>
+                    </select>
+                </div>
+                <div id="vendorFields" style="display:none;">
+                     <div class="mb-3">
+                        <label for="shop_name" class="form-label">Shop Name</label>
+                        <input type="text" class="form-control" id="shop_name" name="shop_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Shop Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="Groceries">Groceries</option>
+                            <option value="Fruits">Fruits</option>
+                            <option value="Vegetables">Vegetables</option>
+                            <option value="Bakery">Bakery</option>
+                            <option value="Stationery">Stationery</option>
+                            <option value="Medical">Medical</option>
+                            <option value="Tiffin">Tiffin</option>
+                            <option value="Tailoring">Tailoring</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+            </form>
+            <p class="mt-4 text-center">Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function toggleVendorFields() {
+    var role = document.getElementById('role').value;
+    var vendorFields = document.getElementById('vendorFields');
+    var shopNameInput = document.getElementById('shop_name');
+    if (role === 'vendor') {
+        vendorFields.style.display = 'block';
+        shopNameInput.required = true;
+    } else {
+        vendorFields.style.display = 'none';
+        shopNameInput.required = false;
+    }
+}
+</script>
+{% endblock %}

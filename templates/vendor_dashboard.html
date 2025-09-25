@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container">
+    <h2>Vendor Dashboard</h2>
+    <p>Welcome, <strong class="hover-underline-animation">{{ vendor.user.name }}</strong>! Manage your shop, products, and orders from here.</p>
+
+    <ul class="nav nav-tabs" id="vendorTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">Manage Orders</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Manage Products</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">Shop Profile</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="vendorTabContent">
+        <div class="tab-pane fade show active" id="orders" role="tabpanel">
+            <h3>Customer Orders</h3>
+            {% if orders %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr data-aos="fade-up">
+                        <td>#{{ order.id }}</td>
+                        <td><strong class="hover-underline-animation">{{ order.customer.name }}</strong></td>
+                        <td>₹{{ "%.2f"|format(order.total_price) }}</td>
+                        <td><span class="badge bg-info">{{ order.status }}</span></td>
+                        <td>
+                            <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="post" class="d-flex">
+                                <select name="status" class="form-select form-select-sm me-2">
+                                    <option value="Placed" {% if order.status == 'Placed' %}selected{% endif %}>Placed</option>
+                                    <option value="Accepted" {% if order.status == 'Accepted' %}selected{% endif %}>Accept</option>
+                                    <option value="Out for Delivery" {% if order.status == 'Out for Delivery' %}selected{% endif %}>Out for Delivery</option>
+                                    <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Deliver</option>
+                                    <option value="Rejected" {% if order.status == 'Rejected' %}selected{% endif %}>Reject</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>You have no orders yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="products" role="tabpanel">
+             <div class="row">
+                <div class="col-md-8">
+                    <h3>Your Products</h3>
+                     <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Available</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr data-aos="fade-up">
+                                <td><strong class="hover-underline-animation">{{ product.name }}</strong></td>
+                                <td>₹{{ "%.2f"|format(product.price) }}</td>
+                                <td>{{ 'Yes' if product.availability else 'No' }}</td>
+                                <td>
+                                    <a href="{{ url_for('delete_product', product_id=product.id) }}" class="btn btn-danger btn-sm">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <h3>Add New Product</h3>
+                    <form action="{{ url_for('add_product') }}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                         <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Price</label>
+                            <input type="number" name="price" step="0.01" class="form-control" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="availability" id="availability" checked>
+                            <label class="form-check-label" for="availability">Available</label>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add Product</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="profile" role="tabpanel">
+            <h3>Update Shop Details</h3>
+            <form action="{{ url_for('update_vendor_profile') }}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Shop Name</label>
+                    <input type="text" name="shop_name" class="form-control" value="{{ vendor.shop_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-control">{{ vendor.address }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" name="contact" class="form-control" value="{{ vendor.contact }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Timings</label>
+                    <input type="text" name="timings" class="form-control" value="{{ vendor.timings }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Delivery Mode</label>
+                    <select name="delivery_mode" class="form-select">
+                        <option value="Pickup" {% if vendor.delivery_mode == 'Pickup' %}selected{% endif %}>Pickup Only</option>
+                        <option value="Vendor Delivery" {% if vendor.delivery_mode == 'Vendor Delivery' %}selected{% endif %}>Delivery Only</option>
+                        <option value="Both" {% if vendor.delivery_mode == 'Both' %}selected{% endif %}>Both</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
